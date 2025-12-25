@@ -299,6 +299,19 @@ public class mainApp extends JFrame {
          bCari.addActionListener(e -> loadMhs(tCariM.getText()));
         
         bClr.addActionListener(e -> clearMhs());
+        
+         bPdf.addActionListener(e -> {
+            if (control.exportPDF(tblMhs, "Data_Mahasiswa_UNPAS.pdf")) {
+                JOptionPane.showMessageDialog(this, 
+                    "Data berhasil di-export ke PDF!\nLokasi: Downloads/Data_Mahasiswa_UNPAS.pdf");
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Gagal export PDF!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        bClr.addActionListener(e -> clearMhs());
+        
 
         tblMhs.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
@@ -409,6 +422,17 @@ public class mainApp extends JFrame {
         });
 
         bCari.addActionListener(e -> loadDos(tCariD.getText()));
+        
+        // Export PDF untuk Dosen
+        bPdf.addActionListener(e -> {
+            if (control.exportPDF(tblDos, "Data_Dosen_UNPAS.pdf")) {
+                JOptionPane.showMessageDialog(this, 
+                    "Data berhasil di-export ke PDF!\nLokasi: Downloads/Data_Dosen_UNPAS.pdf");
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Gagal export PDF!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         
         bClr.addActionListener(e -> clearDosen());
 
@@ -521,6 +545,18 @@ public class mainApp extends JFrame {
         });
 
         bCariMK.addActionListener(e -> loadMK(tCariK.getText())); 
+        
+        // Export PDF untuk Mata Kuliah
+        bPdf.addActionListener(e -> {
+            if (control.exportPDF(tblMK, "Data_MataKuliah_UNPAS.pdf")) {
+                JOptionPane.showMessageDialog(this, 
+                    "Data berhasil di-export ke PDF!\nLokasi: Downloads/Data_MataKuliah_UNPAS.pdf");
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Gagal export PDF!", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
         bClr.addActionListener(e -> clearMK());
 
         tblMK.addMouseListener(new MouseAdapter() {

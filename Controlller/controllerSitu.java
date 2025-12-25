@@ -4,15 +4,31 @@
  */
 package id.ac.unpas.Kelompok7_PP2_B_2025.Controlller;
 
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Element;
+import com.itextpdf.text.Font;
+import com.itextpdf.text.FontFactory;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.Phrase;
+import com.itextpdf.text.pdf.PdfPCell;
+import com.itextpdf.text.pdf.PdfPTable;
+import com.itextpdf.text.pdf.PdfWriter;
 import id.ac.unpas.Kelompok7_PP2_B_2025.Model.entitas.*;
 import id.ac.unpas.Kelompok7_PP2_B_2025.Model.koneksiDB;
+import java.io.File;
+import java.io.FileOutputStream;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import javax.swing.JTable;
 
 public class controllerSitu {
     // ============================================================
@@ -158,5 +174,167 @@ public class controllerSitu {
             list.add(new MataKuliah(rs.getString("kode_mk"), rs.getString("nama_mk"), rs.getInt("sks")));
         }
         return list;
+    }
+    
+    // ============================================================
+    // FITUR EXPORT PDF
+    // ============================================================
+    
+    /**
+     * Export data dari JTable ke format PDF
+     * @param table JTable yang akan di-export
+     * @param filename Nama file PDF yang akan dibuat
+     * @return true jika berhasil, false jika gagal
+     */
+    public boolean exportPDF(JTable table, String filename) {
+        try {
+            // Membuat dokumen PDF dengan ukuran A4 landscape untuk tabel yang lebar
+            Document doc = new Document(PageSize.A4.rotate());
+            
+            // Membuat file di direktori user
+            String userHome = System.getProperty("user.home");
+            String filePath = userHome + File.separator + "Downloads" + File.separator + filename;
+            
+            PdfWriter.getInstance(doc, new FileOutputStream(filePath));
+            doc.open();
+            
+            // Menambahkan judul
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+            Paragraph title = new Paragraph("LAPORAN DATA - SITU2 UNPAS", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(10);
+            doc.add(title);
+            
+            // Menambahkan tanggal export
+            Font dateFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.GRAY);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
+            Paragraph date = new Paragraph("Tanggal Export: " + sdf.format(new Date()), dateFont);
+            date.setAlignment(Element.ALIGN_CENTER);
+            date.setSpacingAfter(20);
+            doc.add(date);
+            
+            // Membuat tabel PDF
+            PdfPTable pdfTable = new PdfPTable(table.getColumnCount());
+            pdfTable.setWidthPercentage(100);
+            
+            // Styling untuk header
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+            
+            // Menambahkan header
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                PdfPCell cell = new PdfPCell(new Phrase(table.getColumnName(i), headerFont));
+                cell.setBackgroundColor(new BaseColor(41, 128, 185)); // Warna biru
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(8);
+                pdfTable.addCell(cell);
+            }
+            
+            // Font untuk data
+            Font dataFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);
+            
+            // Menambahkan data dari tabel
+            for (int row = 0; row < table.getRowCount(); row++) {
+                for (int col = 0; col < table.getColumnCount(); col++) {
+                    Object value = table.getValueAt(row, col);
+                    PdfPCell cell = new PdfPCell(new Phrase(value != null ? value.toString() : "", dataFont));
+                    cell.setPadding(5);
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    
+                    // Warna bergantian untuk baris
+                    if (row % 2 == 0) {
+                        cell.setBackgroundColor(new BaseColor(236, 240, 241)); // Abu-abu muda
+                    }
+                    
+                    pdfTable.addCell(cell);
+                }
+            }
+            
+            doc.add(pdfTable);
+            
+            // Menambahkan footer
+            Paragraph footer = new Paragraph("\n\nTotal Data: " + table.getRowCount() + " record(s)", dateFont);
+            footer.setAlignment(Element.ALIGN_RIGHT);
+            doc.add(footer);
+            
+            doc.close();
+            
+            System.out.println("PDF berhasil dibuat di: " + filePath);
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error saat membuat PDF: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    /**
+     * Export PDF dengan lokasi yang bisa dipilih user
+     */
+    public boolean exportPDFWithPath(JTable table, String fullPath) {
+        try {
+            Document doc = new Document(PageSize.A4.rotate());
+            PdfWriter.getInstance(doc, new FileOutputStream(fullPath));
+            doc.open();
+            
+            // Judul
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18, BaseColor.BLACK);
+            Paragraph title = new Paragraph("LAPORAN DATA - SITU2 UNPAS", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(10);
+            doc.add(title);
+            
+            // Tanggal
+            Font dateFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.GRAY);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd MMMM yyyy HH:mm:ss");
+            Paragraph date = new Paragraph("Tanggal Export: " + sdf.format(new Date()), dateFont);
+            date.setAlignment(Element.ALIGN_CENTER);
+            date.setSpacingAfter(20);
+            doc.add(date);
+            
+            // Tabel
+            PdfPTable pdfTable = new PdfPTable(table.getColumnCount());
+            pdfTable.setWidthPercentage(100);
+            
+            // Header
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12, BaseColor.WHITE);
+            for (int i = 0; i < table.getColumnCount(); i++) {
+                PdfPCell cell = new PdfPCell(new Phrase(table.getColumnName(i), headerFont));
+                cell.setBackgroundColor(new BaseColor(41, 128, 185));
+                cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                cell.setPadding(8);
+                pdfTable.addCell(cell);
+            }
+            
+            // Data
+            Font dataFont = FontFactory.getFont(FontFactory.HELVETICA, 10, BaseColor.BLACK);
+            for (int row = 0; row < table.getRowCount(); row++) {
+                for (int col = 0; col < table.getColumnCount(); col++) {
+                    Object value = table.getValueAt(row, col);
+                    PdfPCell cell = new PdfPCell(new Phrase(value != null ? value.toString() : "", dataFont));
+                    cell.setPadding(5);
+                    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+                    if (row % 2 == 0) {
+                        cell.setBackgroundColor(new BaseColor(236, 240, 241));
+                    }
+                    pdfTable.addCell(cell);
+                }
+            }
+            
+            doc.add(pdfTable);
+            
+            // Footer
+            Paragraph footer = new Paragraph("\n\nTotal Data: " + table.getRowCount() + " record(s)", dateFont);
+            footer.setAlignment(Element.ALIGN_RIGHT);
+            doc.add(footer);
+            
+            doc.close();
+            return true;
+            
+        } catch (Exception e) {
+            System.err.println("Error saat membuat PDF: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
     }
 }
