@@ -2,11 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package id.ac.unpas.TubesSituKami.View;
+package id.ac.unpas.7_PP2_B_2025.View;
 
-import id.ac.unpas.TubesSituKami.Controlller.controllerSitu;
-import id.ac.unpas.TubesSituKami.Model.entitas.*;
-import id.ac.unpas.TubesSituKami.Model.koneksiDB;
+import id.ac.unpas.7_PP2_B_2025.Controlller.controllerSitu;
+import id.ac.unpas.7_PP2_B_2025.Model.entitas.*;
+import id.ac.unpas.7_PP2_B_2025.Model.koneksiDB;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -91,6 +91,67 @@ public class mainApp extends JFrame {
                 "Error Validasi Jurusan", 
                 JOptionPane.ERROR_MESSAGE);
             cbJurusan.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+    
+      // ==========================================
+    // METODE VALIDASI INPUT DOSEN
+    // ==========================================
+    private boolean validateDosenInput() {
+        String nidn = tNidn.getText().trim();
+        String nama = tNamaD.getText().trim();
+        String email = tEmail.getText().trim();
+
+        // Validasi NIDN, Nama, dan Email tidak boleh kosong
+        if (nidn.isEmpty() || nama.isEmpty() || email.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "NIDN, Nama, dan Email wajib diisi!", 
+                "Error Validasi", 
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validasi NIDN harus berupa angka
+        if (!nidn.matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, 
+                "NIDN harus berupa angka Contoh: 0412345678", 
+                "Error Validasi NIDN", 
+                JOptionPane.ERROR_MESSAGE);
+            tNidn.requestFocus();
+            return false;
+        }
+
+        // Validasi Nama harus berupa huruf (boleh dengan spasi)
+        if (!nama.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(this, 
+                "Nama harus berupa huruf (tidak boleh mengandung angka atau karakter khusus)Contoh: Dr Ahmad Santoso", 
+                "Error Validasi Nama", 
+                JOptionPane.ERROR_MESSAGE);
+            tNamaD.requestFocus();
+            return false;
+        }
+
+        // Validasi Email harus mengandung @
+        if (!email.contains("@")) {
+            JOptionPane.showMessageDialog(this, 
+                "Email harus mengandung karakter '@' Contoh: dosen@unpas.ac.id", 
+                "Error Validasi Email", 
+                JOptionPane.ERROR_MESSAGE);
+            tEmail.requestFocus();
+            return false;
+        }
+
+        // Validasi format email lebih detail (opsional tapi direkomendasikan)
+        String emailRegex = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,7}$";
+        if (!email.matches(emailRegex)) {
+            JOptionPane.showMessageDialog(this, 
+                "Format email tidak valid! Contoh: dosen@unpas.ac.id atau nama.dosen@gmail.com", 
+                "Error Validasi Email", 
+                JOptionPane.ERROR_MESSAGE);
+            tEmail.requestFocus();
             return false;
         }
 
@@ -193,3 +254,116 @@ public class mainApp extends JFrame {
         tNpm.setEditable(true);
     }
 }
+
+    // ==========================================
+    // LOGIKA PANEL DOSEN
+    // ==========================================
+    private JPanel panelDosen() {
+        JPanel main = new JPanel(new BorderLayout());
+
+        // Panel Cari
+        JPanel pCari = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton bCari = new JButton("Cari");
+        pCari.add(new JLabel("Cari Nama/NIDN:")); 
+        pCari.add(tCariD); 
+        pCari.add(bCari);
+
+        // Panel Form
+        JPanel pForm = new JPanel(new GridLayout(3, 2, 5, 5));
+        pForm.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pForm.add(new JLabel("NIDN:")); pForm.add(tNidn);
+        pForm.add(new JLabel("Nama:")); pForm.add(tNamaD);
+        pForm.add(new JLabel("Email:")); pForm.add(tEmail);
+
+        // Panel Tombol
+        JPanel pBtn = new JPanel();
+        JButton bSim = new JButton("Simpan"), bUpd = new JButton("Update"), bHap = new JButton("Hapus"), 
+                bPdf = new JButton("Export PDF"), bClr = new JButton("Clear");
+        pBtn.add(bSim); pBtn.add(bUpd); pBtn.add(bHap); pBtn.add(bPdf); pBtn.add(bClr);
+
+        // Tata Letak Atas
+        JPanel pNorth = new JPanel(new BorderLayout());
+        pNorth.add(pCari, BorderLayout.NORTH);
+        pNorth.add(pForm, BorderLayout.CENTER);
+        pNorth.add(pBtn, BorderLayout.SOUTH);
+
+        tblDos.setModel(modDos);
+        main.add(pNorth, BorderLayout.NORTH);
+        main.add(new JScrollPane(tblDos), BorderLayout.CENTER);
+
+        bSim.addActionListener(e -> {
+            if (!validateDosenInput()) {
+                return;
+            }
+            
+            try {
+                control.tambahDosen(new Dosen(tNidn.getText().trim(), tNamaD.getText().trim(), tEmail.getText().trim()));
+                JOptionPane.showMessageDialog(this, "Data Dosen Berhasil Disimpan");
+                loadDos(""); 
+                clearDosen();
+            } catch (Exception ex) { 
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); 
+            }
+        });
+
+        bUpd.addActionListener(e -> {
+            if (!validateDosenInput()) {
+                return;
+            }
+            
+            try {
+                control.ubahDosen(new Dosen(tNidn.getText().trim(), tNamaD.getText().trim(), tEmail.getText().trim()));
+                JOptionPane.showMessageDialog(this, "Data Dosen Berhasil Diupdate");
+                loadDos(""); 
+                clearDosen();
+            } catch (Exception ex) { 
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); 
+            }
+        });
+        
+        bHap.addActionListener(e -> { 
+            int confirm = JOptionPane.showConfirmDialog(this, "Yakin hapus data ini?", "Hapus", JOptionPane.YES_NO_OPTION);
+            if(confirm == JOptionPane.YES_OPTION) {
+                try { 
+                    control.hapusDosen(tNidn.getText().trim()); 
+                    JOptionPane.showMessageDialog(this, "Data Dosen Berhasil Dihapus");
+                    loadDos(""); 
+                    clearDosen();
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        bCari.addActionListener(e -> loadDos(tCariD.getText()));
+        
+        bClr.addActionListener(e -> clearDosen());
+
+        tblDos.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int r = tblDos.getSelectedRow();
+                tNidn.setText(modDos.getValueAt(r, 0).toString());
+                tNamaD.setText(modDos.getValueAt(r, 1).toString());
+                tEmail.setText(modDos.getValueAt(r, 2).toString());
+                tNidn.setEditable(false);
+            }
+        });
+
+        return main;
+    }
+
+    private void loadDos(String key) {
+        modDos.setRowCount(0);
+        try {
+            List<Dosen> list = key.isEmpty() ? control.getAllDosen() : control.cariDosen(key);
+            for(Dosen d : list) modDos.addRow(new Object[]{d.nidn, d.nama, d.email});
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void clearDosen() {
+        tNidn.setText(""); 
+        tNamaD.setText(""); 
+        tEmail.setText(""); 
+        tCariD.setText("");
+        tNidn.setEditable(true);
+    }

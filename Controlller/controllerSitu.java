@@ -66,4 +66,51 @@ public class controllerSitu {
         }
         return list;
     }
+    
+       // ============================================================
+    // 2. FITUR DOSEN (CREATE, READ, UPDATE, DELETE, SEARCH)
+    // ============================================================
+
+    public List<Dosen> getAllDosen() throws SQLException {
+        List<Dosen> list = new ArrayList<>();
+        Connection conn = koneksiDB.configDB();
+        ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM dosen");
+        while(rs.next()) {
+            list.add(new Dosen(rs.getString("nidn"), rs.getString("nama"), rs.getString("email")));
+        }
+        return list;
+    }
+
+    public void tambahDosen(Dosen d) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO dosen VALUES (?,?,?)");
+        ps.setString(1, d.nidn); ps.setString(2, d.nama); ps.setString(3, d.email);
+        ps.execute();
+    }
+
+    public void ubahDosen(Dosen d) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("UPDATE dosen SET nama=?, email=? WHERE nidn=?");
+        ps.setString(1, d.nama); ps.setString(2, d.email); ps.setString(3, d.nidn);
+        ps.executeUpdate();
+    }
+
+    public void hapusDosen(String nidn) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("DELETE FROM dosen WHERE nidn=?");
+        ps.setString(1, nidn);
+        ps.execute();
+    }
+
+    public List<Dosen> cariDosen(String key) throws SQLException {
+        List<Dosen> list = new ArrayList<>();
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM dosen WHERE nama LIKE ? OR nidn LIKE ?");
+        ps.setString(1, "%" + key + "%"); ps.setString(2, "%" + key + "%");
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()) {
+            list.add(new Dosen(rs.getString("nidn"), rs.getString("nama"), rs.getString("email")));
+        }
+        return list;
+    }
 }
