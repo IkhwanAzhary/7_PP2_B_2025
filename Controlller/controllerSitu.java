@@ -113,4 +113,50 @@ public class controllerSitu {
         }
         return list;
     }
+    
+     // 3. FITUR MATA KULIAH (CREATE, READ, UPDATE, DELETE, SEARCH)
+    
+
+    public List<MataKuliah> getAllMK() throws SQLException {
+        List<MataKuliah> list = new ArrayList<>();
+        Connection conn = koneksiDB.configDB();
+        ResultSet rs = conn.createStatement().executeQuery("SELECT * FROM matakuliah");
+        while(rs.next()) {
+            list.add(new MataKuliah(rs.getString("kode_mk"), rs.getString("nama_mk"), rs.getInt("sks")));
+        }
+        return list;
+    }
+
+    public void tambahMK(MataKuliah mk) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("INSERT INTO matakuliah VALUES (?,?,?)");
+        ps.setString(1, mk.kode); ps.setString(2, mk.nama); ps.setInt(3, mk.sks);
+        ps.execute();
+    }
+
+    public void ubahMK(MataKuliah mk) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("UPDATE matakuliah SET nama_mk=?, sks=? WHERE kode_mk=?");
+        ps.setString(1, mk.nama); ps.setInt(2, mk.sks); ps.setString(3, mk.kode);
+        ps.executeUpdate();
+    }
+
+    public void hapusMK(String kode) throws SQLException {
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("DELETE FROM matakuliah WHERE kode_mk=?");
+        ps.setString(1, kode);
+        ps.execute();
+    }
+
+    public List<MataKuliah> cariMK(String key) throws SQLException {
+        List<MataKuliah> list = new ArrayList<>();
+        Connection conn = koneksiDB.configDB();
+        PreparedStatement ps = conn.prepareStatement("SELECT * FROM matakuliah WHERE nama_mk LIKE ? OR kode_mk LIKE ?");
+        ps.setString(1, "%" + key + "%"); ps.setString(2, "%" + key + "%");
+        ResultSet rs = ps.executeQuery();
+        while(rs.next()) {
+            list.add(new MataKuliah(rs.getString("kode_mk"), rs.getString("nama_mk"), rs.getInt("sks")));
+        }
+        return list;
+    }
 }

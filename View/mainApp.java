@@ -34,6 +34,11 @@ public class mainApp extends JFrame {
     private JTable tblDos = new JTable();
     private DefaultTableModel modDos = new DefaultTableModel(new Object[]{"NIDN", "Nama", "Email"}, 0);
     
+    // Komponen Fitur 3: Mata Kuliah
+    private JTextField tKode = new JTextField(), tNamaK = new JTextField(), tSks = new JTextField(), tCariK = new JTextField(15);
+    private JTable tblMK = new JTable();
+    private DefaultTableModel modMK = new DefaultTableModel(new Object[]{"Kode MK", "Nama MK", "SKS"}, 0);
+    
     public mainApp() {
         setTitle("SITU2 UNPAS - Sistem Informasi Akademik");
         setSize(900, 750);
@@ -157,6 +162,56 @@ public class mainApp extends JFrame {
                 "Error Validasi Email", 
                 JOptionPane.ERROR_MESSAGE);
             tEmail.requestFocus();
+            return false;
+        }
+
+        return true;
+    }
+    
+      // METODE VALIDASI INPUT MATA KULIAH
+    
+    private boolean validateMataKuliahInput() {
+        String kode = tKode.getText().trim();
+        String nama = tNamaK.getText().trim();
+        String sks = tSks.getText().trim();
+
+        // Validasi Kode MK, Nama MK, dan SKS tidak boleh kosong
+        if (kode.isEmpty() || nama.isEmpty() || sks.isEmpty()) {
+            JOptionPane.showMessageDialog(this, 
+                "Kode MK, Nama MK, dan SKS wajib diisi!", 
+                "Error Validasi", 
+                JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+        // Validasi Nama MK harus berupa huruf (boleh dengan spasi)
+        if (!nama.matches("[a-zA-Z\\s]+")) {
+            JOptionPane.showMessageDialog(this, 
+                "Nama Mata Kuliah harus berupa huruf (tidak boleh mengandung angka atau karakter khusus)!\nContoh: Pemrograman Berorientasi Objek", 
+                "Error Validasi Nama MK", 
+                JOptionPane.ERROR_MESSAGE);
+            tNamaK.requestFocus();
+            return false;
+        }
+
+        // Validasi SKS harus berupa angka
+        if (!sks.matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, 
+                "SKS harus berupa angka!\nContoh: 3 atau 4", 
+                "Error Validasi SKS", 
+                JOptionPane.ERROR_MESSAGE);
+            tSks.requestFocus();
+            return false;
+        }
+
+        // Validasi SKS harus dalam rentang wajar (1-6)
+        int sksValue = Integer.parseInt(sks);
+        if (sksValue < 1 || sksValue > 6) {
+            JOptionPane.showMessageDialog(this, 
+                "SKS harus dalam rentang 1-6!\nContoh: 2, 3, atau 4", 
+                "Error Validasi SKS", 
+                JOptionPane.ERROR_MESSAGE);
+            tSks.requestFocus();
             return false;
         }
 
@@ -369,6 +424,7 @@ public class mainApp extends JFrame {
 
         return main;
     }
+ 
 
     private void loadDos(String key) {
         modDos.setRowCount(0);
@@ -384,6 +440,116 @@ public class mainApp extends JFrame {
         tEmail.setText(""); 
         tCariD.setText("");
         tNidn.setEditable(true);
+    }
+      // LOGIKA PANEL MATA KULIAH
+   
+    private JPanel panelMK() {
+        JPanel main = new JPanel(new BorderLayout());
+        
+        // Panel Cari
+        JPanel pCari = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JButton bCariMK = new JButton("Cari");
+        pCari.add(new JLabel("Cari Nama/Kode MK:")); 
+        pCari.add(tCariK); 
+        pCari.add(bCariMK);
+        
+        // Panel Form
+        JPanel pForm = new JPanel(new GridLayout(3, 2, 5, 5));
+        pForm.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        pForm.add(new JLabel("Kode MK:")); pForm.add(tKode);
+        pForm.add(new JLabel("Nama MK:")); pForm.add(tNamaK);
+        pForm.add(new JLabel("SKS:")); pForm.add(tSks);
+
+        // Panel Tombol
+        JPanel pBtn = new JPanel();
+        JButton bSim = new JButton("Simpan"), bUpd = new JButton("Update"), 
+                bHap = new JButton("Hapus"), bPdf = new JButton("Export PDF"), bClr = new JButton("Clear");
+        pBtn.add(bSim); pBtn.add(bUpd); pBtn.add(bHap); pBtn.add(bPdf); pBtn.add(bClr);
+
+        // Tata Letak
+        JPanel pNorth = new JPanel(new BorderLayout());
+        pNorth.add(pCari, BorderLayout.NORTH);
+        pNorth.add(pForm, BorderLayout.CENTER);
+        pNorth.add(pBtn, BorderLayout.SOUTH);
+
+        tblMK.setModel(modMK);
+        main.add(pNorth, BorderLayout.NORTH);
+        main.add(new JScrollPane(tblMK), BorderLayout.CENTER);
+
+        bSim.addActionListener(e -> {
+            if (!validateMataKuliahInput()) {
+                return;
+            }
+            
+            try {
+                control.tambahMK(new MataKuliah(tKode.getText().trim(), tNamaK.getText().trim(), Integer.parseInt(tSks.getText().trim())));
+                JOptionPane.showMessageDialog(this, "Data Mata Kuliah Berhasil Disimpan");
+                loadMK(""); 
+                clearMK();
+            } catch (Exception ex) { 
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); 
+            }
+        });
+
+        bUpd.addActionListener(e -> {
+            if (!validateMataKuliahInput()) {
+                return;
+            }
+            
+            try {
+                control.ubahMK(new MataKuliah(tKode.getText().trim(), tNamaK.getText().trim(), Integer.parseInt(tSks.getText().trim())));
+                JOptionPane.showMessageDialog(this, "Data Mata Kuliah Berhasil Diupdate");
+                loadMK(""); 
+                clearMK();
+            } catch (Exception ex) { 
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); 
+            }
+        });
+
+        bHap.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Yakin hapus data ini?", "Hapus", JOptionPane.YES_NO_OPTION);
+            if(confirm == JOptionPane.YES_OPTION) {
+                try {
+                    control.hapusMK(tKode.getText().trim());
+                    JOptionPane.showMessageDialog(this, "Data Mata Kuliah Berhasil Dihapus");
+                    loadMK(""); 
+                    clearMK();
+                } catch (Exception ex) { 
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE); 
+                }
+            }
+        });
+
+        bCariMK.addActionListener(e -> loadMK(tCariK.getText())); 
+        bClr.addActionListener(e -> clearMK());
+
+        tblMK.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int r = tblMK.getSelectedRow();
+                tKode.setText(modMK.getValueAt(r, 0).toString());
+                tNamaK.setText(modMK.getValueAt(r, 1).toString());
+                tSks.setText(modMK.getValueAt(r, 2).toString());
+                tKode.setEditable(false);
+            }
+        });
+
+        return main;
+    }
+
+    private void loadMK(String key) {
+        modMK.setRowCount(0);
+        try {
+            List<MataKuliah> list = key.isEmpty() ? control.getAllMK() : control.cariMK(key);
+            for(MataKuliah mk : list) modMK.addRow(new Object[]{mk.kode, mk.nama, mk.sks});
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private void clearMK() {
+        tKode.setText(""); 
+        tNamaK.setText(""); 
+        tSks.setText(""); 
+        tCariK.setText("");
+        tKode.setEditable(true);
     }
   }
 
