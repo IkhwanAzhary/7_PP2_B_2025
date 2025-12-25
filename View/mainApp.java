@@ -2,11 +2,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package id.ac.unpas.7_PP2_B_2025.View;
+package id.ac.unpas.Kelompok7_PP2_B_2025.View;
 
-import id.ac.unpas.7_PP2_B_2025.Controlller.controllerSitu;
-import id.ac.unpas.7_PP2_B_2025.Model.entitas.*;
-import id.ac.unpas.7_PP2_B_2025.Model.koneksiDB;
+import id.ac.unpas.Kelompok7_PP2_B_2025.Controlller.controllerSitu;
+import id.ac.unpas.Kelompok7_PP2_B_2025.Model.entitas.*;
+import id.ac.unpas.Kelompok7_PP2_B_2025.Model.koneksiDB;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.List;
@@ -28,6 +28,11 @@ public class mainApp extends JFrame {
     });
     private JTable tblMhs = new JTable();
     private DefaultTableModel modMhs = new DefaultTableModel(new Object[]{"NPM", "Nama", "Jurusan"}, 0);
+    
+      // Komponen Fitur 2: Dosen
+    private JTextField tNidn = new JTextField(), tNamaD = new JTextField(), tEmail = new JTextField(), tCariD = new JTextField(15);
+    private JTable tblDos = new JTable();
+    private DefaultTableModel modDos = new DefaultTableModel(new Object[]{"NIDN", "Nama", "Email"}, 0);
     
     public mainApp() {
         setTitle("SITU2 UNPAS - Sistem Informasi Akademik");
@@ -236,9 +241,24 @@ public class mainApp extends JFrame {
             }
         });
 
-        bCari.addActionListener(e -> loadMhs(tCariM.getText()));
+         bCari.addActionListener(e -> loadMhs(tCariM.getText()));
+        
+        bClr.addActionListener(e -> clearMhs());
 
-    private void loadMhs(String key) {
+        tblMhs.addMouseListener(new MouseAdapter() {
+            public void mouseClicked(MouseEvent e) {
+                int r = tblMhs.getSelectedRow();
+                tNpm.setText(modMhs.getValueAt(r, 0).toString());
+                tNamaM.setText(modMhs.getValueAt(r, 1).toString());
+                cbJurusan.setSelectedItem(modMhs.getValueAt(r, 2).toString());
+                tNpm.setEditable(false);
+            }
+        });
+
+        return main;
+}
+
+        private void loadMhs(String key) {
         modMhs.setRowCount(0);
         try {
             List<Mahasiswa> list = key.isEmpty() ? control.getAllMahasiswa() : control.cariMahasiswa(key);
@@ -253,8 +273,6 @@ public class mainApp extends JFrame {
         tCariM.setText("");
         tNpm.setEditable(true);
     }
-}
-
     // ==========================================
     // LOGIKA PANEL DOSEN
     // ==========================================
@@ -367,3 +385,5 @@ public class mainApp extends JFrame {
         tCariD.setText("");
         tNidn.setEditable(true);
     }
+  }
+

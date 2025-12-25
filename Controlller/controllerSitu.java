@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package id.ac.unpas.7_B_PP2_2025.Controlller;
+package id.ac.unpas.Kelompok7_PP2_B_2025.Controlller;
 
-import id.ac.unpas.7_PP2_B_2025.Model.entitas.*;
-import id.ac.unpas.7_PP2_B_2025.Model.koneksiDB;
+import id.ac.unpas.Kelompok7_PP2_B_2025.Model.entitas.*;
+import id.ac.unpas.Kelompok7_PP2_B_2025.Model.koneksiDB;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
